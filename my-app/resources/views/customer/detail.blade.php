@@ -17,9 +17,9 @@
     <style>
         /* Custom styling to visually highlight the selected size button */
         .size-button.selected {
-            /* This mimics a ring effect using border color and a shadow for consistency */
-            border-color: #1f2937; /* Tailwind's gray-900 */
-            box-shadow: 0 0 0 2px white, 0 0 0 4px #1f2937; /* Simulate ring-offset-2 ring-2 */
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
         }
     </style>
 </head>
@@ -70,129 +70,130 @@
             </div>
 
             {{-- PRODUCT DETAILS SECTION --}}
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+            <div class="flex flex-col lg:flex-row gap-12 lg:gap-20">
 
-                {{-- 1. Product Image Area --}}
-                <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl border border-gray-100 flex justify-center items-center h-full">
-                    <img class="w-full max-h-[600px] object-contain transform transition duration-500 hover:scale-[1.03]"
+                {{-- 1. Product Image Area (Sticky on Desktop) --}}
+                <div class="w-full lg:w-3/5">
+                    <div class="sticky top-24 bg-[#F6F6F6] rounded-[2.5rem] p-10 md:p-16 flex justify-center items-center overflow-hidden group">
+                        {{-- Subtle background text/element --}}
+                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[15rem] font-black text-gray-200/50 uppercase tracking-tighter mix-blend-multiply pointer-events-none select-none z-0">
+                            {{ mb_substr($product->category, 0, 3) }}
+                        </div>
+                        <img class="relative z-10 w-full max-h-[600px] object-contain drop-shadow-2xl transition duration-700 ease-out group-hover:scale-110 group-hover:-rotate-2"
                              src="data:image/jpeg;base64,{{ base64_encode($product->image) }}"
                              alt="{{ $product->title }} Shoe">
+                    </div>
                 </div>
 
                 {{-- 2. Product Details and Action Area --}}
-                <div class="flex flex-col justify-center py-6">
+                <div class="w-full lg:w-2/5 flex flex-col justify-center py-4 lg:py-10">
 
-                    <p class="text-sm font-bold uppercase tracking-widest text-gray-500 mb-2">{{ $product->category }}</p>
+                    <p class="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 mb-3">{{ $product->category }} Collection</p>
 
                     {{-- Title --}}
-                    <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-none">
+                    <h1 class="text-5xl md:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase leading-[1.1]">
                         {{ $product->title }}
                     </h1>
 
                     {{-- Price & Stock --}}
-                    <div class="mb-8 pt-4 border-t border-gray-200">
-                        <p class="text-4xl font-black text-gray-900">
+                    <div class="mb-10 flex items-end justify-between border-b border-gray-200 pb-8">
+                        <p class="text-4xl md:text-5xl font-medium text-gray-900 tracking-tight">
                             ₱{{ number_format($product->price, 2) }}
                         </p>
-                        <p class="text-lg mt-2 font-semibold {{ $product->stock > 0 ? 'text-green-600' : 'text-red-600' }}">
-                            <i class="fas {{ $product->stock > 0 ? 'fa-check-circle' : 'fa-times-circle' }} mr-1"></i>
-                            {{ $product->stock > 0 ? 'In Stock ('.$product->stock.' available)' : 'Out of Stock' }}
-                        </p>
+                        <div class="bg-gray-100 rounded-full px-4 py-2 flex items-center">
+                            @if($product->stock > 0)
+                                <div class="w-2.5 h-2.5 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+                                <span class="text-sm font-bold text-gray-900 uppercase tracking-wider">{{ $product->stock }} Available</span>
+                            @else
+                                <div class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></div>
+                                <span class="text-sm font-bold text-gray-900 uppercase tracking-wider">Sold Out</span>
+                            @endif
+                        </div>
                     </div>
 
                     {{-- Description --}}
-                    <h2 class="text-xl font-bold text-gray-800 mb-3">Product Story</h2>
-                    <p class="text-gray-600 mb-8 leading-loose">
-                        {{ $product->description }}
-                    </p>
+                    <div class="mb-10">
+                        <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-900 mb-4">The Story</h3>
+                        <p class="text-lg text-gray-600 leading-relaxed font-light">
+                            {{ $product->description }}
+                        </p>
+                    </div>
                     
                     {{-- Add to Cart Form --}}
                     @if($product->stock > 0)
-                        <form id="addToCartForm" action="{{ route('cart.add', $product->id) }}" method="POST" class="space-y-6">
+                        <form id="addToCartForm" action="{{ route('cart.add', $product->id) }}" method="POST" class="space-y-10">
                             @csrf
                             
-                            {{-- START: Combined Size Selector and Review Link (Responsive) --}}
-                            {{-- Uses flex-col for mobile stacking and flex-row for tablet/desktop side-by-side layout --}}
-                            <div class="flex flex-col sm:flex-row sm:space-x-8 space-y-6 sm:space-y-0 items-start">
-                                
-                                {{-- Size Selector (Static) --}}
-                                <div class="flex-grow">
-                                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex justify-between items-center">
-                                        <span>Select Size (US Men's)</span>
-                                        {{-- Error message for validation --}}
-                                        <span id="sizeError" class="text-xs font-semibold text-red-500 opacity-0 transition-opacity duration-300">
-                                            Please select a size!
-                                        </span>
-                                    </h3>
-                                    <div class="flex flex-wrap gap-3">
-                                        @php
-                                            // Static list of sizes for demonstration
-                                            $sizes = [7, 8, 9, 10, 11, 12];
-                                        @endphp
-                                        @foreach($sizes as $size)
-                                            <button type="button" 
-                                                    data-size="{{ $size }}"
-                                                    class="size-button w-14 h-14 border border-gray-300 rounded-lg text-sm font-semibold 
-                                                            hover:border-gray-900 transition-colors duration-200 bg-white shadow-sm">
-                                                {{ $size }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                    <input type="hidden" name="size" id="selectedSize" value="">
-                                </div>
-
-                                {{-- Minimalist Review Link/Summary --}}
-                                <div class="flex-shrink-0 w-full sm:w-auto mt-0 sm:mt-0">
-                                    <p class="text-lg font-bold text-gray-800 mb-3">Rating</p>
-                                    <div class="flex items-center space-x-2">
-                                        {{-- Static 4-star rating for presentation --}}
-                                        <span class="text-xl text-yellow-500">
-                                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
-                                        </span>
-                                        <p class="text-gray-700 font-semibold">4.0</p>
-                                        <a href="#reviews" class="text-sm text-gray-500 underline hover:text-gray-900 transition" aria-label="View 5 Customer Reviews">
-                                            (5 Reviews)
-                                        </a>
-                                    </div>
-                                    <button class="text-sm text-black font-semibold mt-2 hover:text-gray-700 transition">
-                                        Write a Review
-                                    </button>
-                                </div>
-                                
-                            </div>
-                            {{-- END: Combined Size Selector and Review Link (Responsive) --}}
-                            {{-- Quantity Selector --}}
+                            {{-- START: Combined Size Selector --}}
                             <div>
-                                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                                <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ $product->stock > 10 ? 10 : $product->stock }}" 
-                                        class="w-24 p-3 border border-gray-300 rounded-lg text-center focus:ring-gray-900 focus:border-gray-900 shadow-sm"
-                                        required>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xs font-bold uppercase tracking-[0.2em] text-gray-900">Select Size</h3>
+                                    <button type="button" class="text-xs font-bold text-gray-400 hover:text-gray-900 underline underline-offset-4 transition">Size Guide</button>
+                                </div>
+                                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                                    @php
+                                        $sizes = [7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 12, 13, 14];
+                                    @endphp
+                                    @foreach($sizes as $size)
+                                        <button type="button" 
+                                                data-size="{{ $size }}"
+                                                class="size-button h-14 border border-gray-200 rounded-xl text-base font-medium text-gray-900
+                                                        hover:border-black transition-all duration-200 bg-white">
+                                            US {{ $size }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                                <span id="sizeError" class="text-xs font-bold text-red-500 mt-2 block opacity-0 transition-opacity duration-300">
+                                    Please select a size to continue.
+                                </span>
+                                <input type="hidden" name="size" id="selectedSize" value="">
                             </div>
 
-                            @auth
-                                {{-- Add to Cart Button (Initially Disabled, requires size selection) --}}
-                                <button type="submit" id="addToCartButton" disabled
-                                        class="w-full px-8 py-4 rounded-xl bg-gray-900 text-white font-bold text-lg 
-                                                transition duration-200 ease-in-out shadow-lg shadow-gray-900/30
-                                                flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900">
-                                    <i class="fas fa-shopping-cart text-lg"></i>
-                                    <span>Add to Cart</span>
-                                </button>
-                            @else
-                                {{-- Login Button --}}
-                                <a href="{{ route('login') }}" 
-                                class="w-full px-8 py-4 rounded-xl bg-gray-900 text-white font-bold text-lg 
-                                        hover:bg-gray-700 transition duration-200 ease-in-out shadow-lg shadow-gray-900/40 text-center inline-block">
-                                    Login to Purchase
-                                </a>
-                            @endauth
+                            <div class="flex space-x-4">
+                                {{-- Quantity Selector --}}
+                                <div class="w-1/3">
+                                    <select name="quantity" id="quantity" class="w-full h-16 px-4 border border-gray-200 rounded-xl text-lg font-medium text-gray-900 focus:ring-black focus:border-black bg-white appearance-none cursor-pointer">
+                                        @for($i = 1; $i <= min(10, $product->stock); $i++)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+
+                                @auth
+                                    {{-- Add to Cart Button --}}
+                                    <button type="submit" id="addToCartButton" disabled
+                                            class="w-2/3 h-16 rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider
+                                                    hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20
+                                                    disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-black disabled:shadow-none">
+                                        Add to Bag
+                                    </button>
+                                @else
+                                    {{-- Login Button --}}
+                                    <a href="{{ route('login') }}" 
+                                    class="w-2/3 h-16 flex items-center justify-center rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20">
+                                        Login to Order
+                                    </a>
+                                @endauth
+                            </div>
                         </form>
                     @else
                         {{-- Out of Stock Button --}}
-                        <button disabled class="w-full px-8 py-4 rounded-xl bg-red-100 text-red-700 font-bold text-lg cursor-not-allowed border border-red-300">
-                            <i class="fas fa-ban mr-2"></i> Sold Out
-                        </button>
+                        <div class="h-16 w-full flex items-center justify-center rounded-xl bg-gray-100 text-gray-500 font-bold text-lg uppercase tracking-wider cursor-not-allowed">
+                            Sold Out
+                        </div>
                     @endif
+                    
+                    {{-- Care & Shipping Info Accordion style placeholders --}}
+                    <div class="mt-12 border-t border-gray-200 pt-6 space-y-4">
+                        <div class="flex justify-between items-center cursor-pointer group">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-900">Shipping & Returns</h4>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-black transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        <div class="flex justify-between items-center cursor-pointer group">
+                            <h4 class="text-sm font-bold uppercase tracking-wider text-gray-900">Product Reviews (4.8/5)</h4>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-black transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
             {{-- REVIEW SECTION (Placeholder for full section) --}}
