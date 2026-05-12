@@ -56,6 +56,10 @@ Route::middleware(['auth', 'isAdmin'])->group(function () {
     // Remove item from cart
     Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])->name('cart.remove');
 
+    // Increment / Decrement item quantity
+    Route::patch('/cart/{item}/increment', [CartController::class, 'increment'])->name('cart.increment');
+    Route::patch('/cart/{item}/decrement', [CartController::class, 'decrement'])->name('cart.decrement');
+
     // Update quantity
     Route::patch('/cart/update/{item}', [CartController::class, 'updateQuantity'])->name('cart.update');
 

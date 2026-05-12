@@ -50,6 +50,22 @@ class CartController extends Controller
 
         return back()->with('success', 'Quantity updated!');
     }
+    
+    // Increment item quantity by 1
+    public function increment(Cart $item)
+    {
+        $item->increment('quantity');
+        return back()->with('success', 'Quantity increased.');
+    }
+
+    // Decrement item quantity by 1 (min 1)
+    public function decrement(Cart $item)
+    {
+        if ($item->quantity > 1) {
+            $item->decrement('quantity');
+        }
+        return back()->with('success', 'Quantity updated.');
+    }
     public function removeSelected(Request $request)
 {
     if ($request->has('selected')) {
