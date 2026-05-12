@@ -12,7 +12,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Product::where('category', 'men')
+        $products = Product::where('category', 'Men')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -26,7 +26,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Product::where('category', 'women')
+        $products = Product::where('category', 'Women')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -40,7 +40,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Product::where('category', 'kids')
+        $products = Product::where('category', 'Kids')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -54,7 +54,7 @@ class ProductController extends Controller
     {
         $search = $request->input('search');
 
-        $products = Product::where('category', 'sale')
+        $products = Product::where('category', 'Sale')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })

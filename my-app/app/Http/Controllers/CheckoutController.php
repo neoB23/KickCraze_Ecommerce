@@ -22,44 +22,43 @@ class CheckoutController extends Controller
 
     // Process checkout
     public function process()
-{
-    $userId = Auth::id();
-    
-    $cartItems = Cart::with('product')
-                     ->where('user_id', $userId)
-                     ->get();
+    {
+        $userId = Auth::id();
+        
+        $cartItems = Cart::with('product')
+                         ->where('user_id', $userId)
+                         ->get();
 
-    if ($cartItems->isEmpty()) {
-        return back()->with('error', 'Your cart is empty.');
-    }
-
-    // Check stock for each item
-    foreach ($cartItems as $item) {
-        if ($item->quantity > $item->product->stock) {
-            return back()->with('error', $item->product->title . ' does not have enough stock.');
+        if ($cartItems->isEmpty()) {
+            return back()->with('error', 'Your cart is empty.');
         }
+
+        // Check stock for each item
+        foreach ($cartItems as $item) {
+            if ($item->quantity > $item->product->stock) {
+                return back()->with('error', $item->product->title . ' does not have enough stock.');
+            }
+        }
+
+        // Create an OrderItem for each cart item
+        foreach ($cartItems as $cartItem) {
+            $itemTotal = $cartItem->quantity * $cartItem->product->price;
+            
+            OrderItem::create([
+                'customer_id'  => $userId,
+                'product_id'   => $cartItem->product_id,
+                'quantity'     => $cartItem->quantity,
+                'total_amount' => $itemTotal,
+                'status'       => 'Pending',
+            ]);
+
+            // Reduce stock for each product
+            $cartItem->product->decrement('stock', $cartItem->quantity);
+        }
+
+        // Clear the cart
+        Cart::where('user_id', $userId)->delete();
+
+        return redirect()->route('customer.orders')->with('success', 'Checkout complete!');
     }
-
-    // Calculate total
-    $totalAmount = $cartItems->sum(function($item) {
-        return $item->quantity * $item->product->price;
-    });
-
-    // Create the order
-    OrderItem::create([
-        'customer_id'  => $userId,
-        'total_amount' => $totalAmount,
-        'status'       => 'Pending',
-    ]);
-
-    // Reduce stock for each product
-    foreach ($cartItems as $item) {
-        $item->product->decrement('stock', $item->quantity);
-    }
-
-    // Clear the cart
-    Cart::where('user_id', $userId)->delete();
-
-    return redirect()->route('customer.orders')->with('success', 'Checkout complete!');
-}
 }
