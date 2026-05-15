@@ -7,16 +7,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="icon" href="{{ asset('Images/logo.png') }}" type="image/png">
 </head>
-<body class="bg-gray-100">
+<body class="bg-white text-zinc-950 antialiased">
+    <style>[x-cloak]{display:none!important}</style>
 
     {{-- Navigation --}}
     @include('components.navbar')
     @include('components.subnav')
     @include('components.banner')
-  
+
 
     {{-- Page Content --}}
-    <main class="py-6 px-4">
+    <main>
         @yield('content')
     </main>
 

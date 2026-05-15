@@ -40,6 +40,10 @@
                     <i data-lucide="package" class="w-5 h-5"></i>
                     Products
                 </a>
+                <a href="{{ route('admin.brands.index') }}" class="flex items-center gap-3 px-8 py-3 text-sm transition-colors border-l-4 border-transparent @if(request()->routeIs('admin.brands.*')) active-link @else text-slate-500 hover:bg-slate-50 hover:text-slate-900 @endif">
+                    <i data-lucide="tags" class="w-5 h-5"></i>
+                    Brands
+                </a>
                 <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 px-8 py-3 text-sm transition-colors border-l-4 border-transparent @if(request()->routeIs('admin.orders.*')) active-link @else text-slate-500 hover:bg-slate-50 hover:text-slate-900 @endif">
                     <i data-lucide="file-text" class="w-5 h-5"></i>
                     Orders

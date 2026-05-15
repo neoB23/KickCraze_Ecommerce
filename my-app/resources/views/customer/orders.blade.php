@@ -21,13 +21,84 @@
 </div>
 
 {{-- Main Content --}}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-24">
-    <div class="space-y-6">
-    
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-24" x-data="{ active: 'all' }">
+
+    {{-- Stats Strip --}}
+    @php
+        $totalOrders     = $orders->count();
+        $pendingOrders   = $orders->filter(fn($o) => strtolower($o->status) === 'pending')->count();
+        $shippedOrders   = $orders->filter(fn($o) => strtolower($o->status) === 'shipped')->count();
+        $deliveredOrders = $orders->filter(fn($o) => strtolower($o->status) === 'delivered')->count();
+        $totalSpent      = $orders->sum('total_amount');
+    @endphp
+    @if($totalOrders > 0)
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div class="bg-white rounded-2xl border border-zinc-200/60 shadow-xl shadow-zinc-200/40 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-zinc-950 text-white flex items-center justify-center"><i class="fas fa-receipt"></i></div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Total Orders</p>
+                    <p class="text-2xl font-black text-zinc-900 leading-tight">{{ $totalOrders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-zinc-200/60 shadow-xl shadow-zinc-200/40 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i class="fas fa-clock"></i></div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Pending</p>
+                    <p class="text-2xl font-black text-zinc-900 leading-tight">{{ $pendingOrders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-zinc-200/60 shadow-xl shadow-zinc-200/40 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center"><i class="fas fa-truck"></i></div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Shipped</p>
+                    <p class="text-2xl font-black text-zinc-900 leading-tight">{{ $shippedOrders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-zinc-200/60 shadow-xl shadow-zinc-200/40 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-100 text-green-700 flex items-center justify-center"><i class="fas fa-peso-sign"></i></div>
+                <div>
+                    <p class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Total Spent</p>
+                    <p class="text-2xl font-black text-zinc-900 leading-tight">₱{{ number_format($totalSpent, 0) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Status Filter Tabs --}}
+    <div class="flex flex-wrap gap-2 mb-6">
+        @php
+            $tabs = [
+                ['key' => 'all',       'label' => 'All',        'count' => $totalOrders],
+                ['key' => 'pending',   'label' => 'Pending',    'count' => $pendingOrders],
+                ['key' => 'shipped',   'label' => 'Shipped',    'count' => $shippedOrders],
+                ['key' => 'delivered', 'label' => 'Delivered',  'count' => $deliveredOrders],
+            ];
+        @endphp
+        @foreach($tabs as $tab)
+            <button type="button"
+                    @click="active = '{{ $tab['key'] }}'"
+                    :class="active === '{{ $tab['key'] }}' ? 'bg-zinc-950 text-white border-zinc-950' : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-400'"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-2 text-xs font-black uppercase tracking-widest transition">
+                {{ $tab['label'] }}
+                <span :class="active === '{{ $tab['key'] }}' ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-700'" class="px-2 py-0.5 rounded-full text-[10px]">{{ $tab['count'] }}</span>
+            </button>
+        @endforeach
+    </div>
+    @endif
+
     <div class="space-y-6">
         @forelse($orders as $order)
+            @php $orderStatus = strtolower($order->status); @endphp
             {{-- Order Card --}}
-            <div class="bg-white rounded-2xl shadow-xl shadow-zinc-200/50 border border-zinc-200/60 overflow-hidden hover:shadow-2xl hover:shadow-zinc-200 transition-all duration-300 relative group">
+            <div x-show="active === 'all' || active === '{{ $orderStatus }}'" x-transition.opacity
+                 class="bg-white rounded-2xl shadow-xl shadow-zinc-200/50 border border-zinc-200/60 overflow-hidden hover:shadow-2xl hover:shadow-zinc-200 transition-all duration-300 relative group">
                 
                 {{-- Accent Bar --}}
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-zinc-800 to-zinc-950 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -46,7 +117,7 @@
                             </div>
                             <div>
                                 <span class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Total Paid</span>
-                                <span class="block text-xl font-black text-zinc-900">${{ number_format($order->total_amount, 2) }}</span>
+                                <span class="block text-xl font-black text-zinc-900">₱{{ number_format($order->total_amount, 2) }}</span>
                             </div>
                         </div>
 
