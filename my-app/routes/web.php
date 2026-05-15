@@ -7,6 +7,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomerOrderController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
@@ -74,8 +75,13 @@ Route::middleware(['auth', 'isAdmin'])->group(function () {
     // Update quantity
     Route::patch('/cart/update/{item}', [CartController::class, 'updateQuantity'])->name('cart.update');
 
+    // Wishlist
+    Route::get('/customer/heart', [WishlistController::class, 'index'])->name('customer.heart');
+    Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+    Route::delete('/wishlist/{item}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+    Route::post('/wishlist/{item}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('wishlist.moveToCart');
+
     // Other customer pages
-    Route::get('/customer/heart', fn() => view('customer.heart'))->name('customer.heart');
     Route::get('/customer/checkout', fn() => view('customer.checkout'))->name('customer.checkout');
     Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout.process');
     Route::get('/customer/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');

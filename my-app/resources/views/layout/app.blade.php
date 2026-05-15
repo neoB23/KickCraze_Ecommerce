@@ -10,6 +10,10 @@
 <body class="bg-white text-zinc-950 antialiased">
     <style>[x-cloak]{display:none!important}</style>
 
+    {{-- Global loaders & toasts --}}
+    @include('components.page-loader')
+    @include('components.toast')
+
     {{-- Navigation --}}
     @include('components.navbar')
     @include('components.subnav')

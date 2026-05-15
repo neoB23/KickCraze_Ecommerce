@@ -83,7 +83,10 @@
         @if($items->count() > 0)
         <div class="lg:w-2/5">
             <div class="lg:sticky lg:top-20 space-y-6">
-                <form action="{{ route('checkout.process') }}" method="POST">
+                <form action="{{ route('checkout.process') }}" method="POST"
+                      data-loader-overlay
+                      data-loader-label="Placing your order"
+                      data-loader-message="Confirming inventory & payment…">
                     @csrf
 
                     <div class="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm">

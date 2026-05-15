@@ -23,27 +23,6 @@
 
 <div class="bg-gray-50 font-sans antialiased">
 
-    {{-- SUCCESS NOTIFICATION --}}
-    @if (session('success'))
-        <div id="successNotification"
-             class="fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl transition-transform transform duration-500 ease-in-out
-                    bg-black border border-zinc-200 text-white flex items-center space-x-3"
-             role="alert">
-            <i class="fas fa-check-circle text-xl"></i>
-            <div>
-                <p class="font-bold">Success!</p>
-                <p class="text-sm">{{ session('success') }}</p>
-            </div>
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const n = document.getElementById('successNotification');
-                if (!n) return;
-                setTimeout(() => n.classList.add('translate-x-full'), 2500);
-            });
-        </script>
-    @endif
-
     <main class="min-h-screen pt-12 pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -183,17 +162,37 @@
 
                                 @auth
                                     <button type="submit" id="addToCartButton" disabled
-                                            class="w-2/3 h-16 rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-black disabled:shadow-none">
+                                            class="flex-1 h-16 rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-black disabled:shadow-none">
                                         Add to Bag
                                     </button>
                                 @else
                                     <a href="{{ route('login') }}"
-                                       class="w-2/3 h-16 flex items-center justify-center rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20">
+                                       class="flex-1 h-16 flex items-center justify-center rounded-xl bg-black text-white font-bold text-lg uppercase tracking-wider hover:bg-gray-800 transition duration-300 ease-out shadow-xl shadow-black/20">
                                         Login to Order
                                     </a>
                                 @endauth
                             </div>
                         </form>
+
+                        {{-- Wishlist toggle --}}
+                        <div class="mt-4">
+                            @auth
+                                <form action="{{ route('wishlist.toggle', $product->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full h-14 inline-flex items-center justify-center gap-3 rounded-xl border-2 {{ $inWishlist ? 'border-rose-500 bg-rose-50 text-rose-600' : 'border-gray-200 bg-white text-gray-900 hover:border-black' }} font-bold text-sm uppercase tracking-wider transition duration-200">
+                                        <i class="{{ $inWishlist ? 'fas' : 'far' }} fa-heart"></i>
+                                        {{ $inWishlist ? 'Saved to Wishlist' : 'Add to Wishlist' }}
+                                    </button>
+                                </form>
+                            @else
+                                <a href="{{ route('login') }}"
+                                   class="w-full h-14 flex items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 font-bold text-sm uppercase tracking-wider hover:border-black transition duration-200">
+                                    <i class="far fa-heart"></i>
+                                    Login to Save
+                                </a>
+                            @endauth
+                        </div>
                     @else
                         <div class="h-16 w-full flex items-center justify-center rounded-xl bg-gray-100 text-gray-500 font-bold text-lg uppercase tracking-wider cursor-not-allowed">
                             Sold Out

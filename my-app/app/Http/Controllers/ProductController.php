@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -59,7 +60,14 @@ class ProductController extends Controller
             'totalCount'    => Product::where('category', $category)->count(),
         ];
 
-        return compact('products', 'filterOptions');
+        $wishlistedIds = auth()->check()
+            ? Wishlist::where('user_id', auth()->id())
+                ->whereIn('product_id', $products->pluck('id'))
+                ->pluck('product_id')
+                ->all()
+            : [];
+
+        return compact('products', 'filterOptions', 'wishlistedIds');
     }
 
     public function mens(Request $request)
@@ -103,8 +111,14 @@ class ProductController extends Controller
         $ratingCounts   = collect($ratingBuckets)
             ->mapWithKeys(fn($r) => [$r => $reviews->where('rating', $r)->count()]);
 
+        $inWishlist = auth()->check()
+            ? \App\Models\Wishlist::where('user_id', auth()->id())
+                ->where('product_id', $product->id)
+                ->exists()
+            : false;
+
         return view('customer.detail', compact(
-            'product', 'similar', 'reviews', 'averageRating', 'reviewCount', 'ratingCounts'
+            'product', 'similar', 'reviews', 'averageRating', 'reviewCount', 'ratingCounts', 'inWishlist'
         ));
     }
 }
