@@ -7,7 +7,6 @@ sed -ri "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-avai
 
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
 php artisan migrate --force
 # php artisan db:seed --force   # uncomment for FIRST DEPLOY ONLY, then re-comment and redeploy
 
